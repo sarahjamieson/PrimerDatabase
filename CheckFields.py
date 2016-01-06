@@ -23,10 +23,11 @@ class CheckFields(object):
         check = 0
         for row_index, row in self.primer_df.iterrows():
             for letter in row['Primer_seq']:
-                if letter not in nuc_list:
-                    check += 1
-                    print "Error: Invalid sequence"
-                    print row['Primer_seq']
+                if not letter.isspace:
+                    if letter not in nuc_list:
+                        check += 1
+                        print "Error: Invalid sequence"
+                        print row['Exon'], row['Primer_seq']
 
         if check == 0:
             print "All primer sequences valid"
@@ -62,7 +63,8 @@ class CheckFields(object):
     def check_version(self):
         check = 0
         for row_index, row in self.primer_df.iterrows():
-            if (not isinstance(row['Version_no'], float)) and (not isinstance(row['Version_no'], int)):
+            if (row['Version_no'] is not None) and (not isinstance(row['Version_no'], float)) and (
+                    not isinstance(row['Version_no'], int)):
                 check += 1
                 print "Error: Version not a number"
                 print row['Version_no']
@@ -73,14 +75,11 @@ class CheckFields(object):
     def check_anneal(self):
         check = 0
         for row_index, row in self.primer_df.iterrows():
-            if (not isinstance(row['Anneal_temp'], float)) and (not isinstance(row['Anneal_temp'], int)):
-                check += 1
-                print "Error: Annealing temperature not a number"
-                print row['Anneal_temp']
-            if (row['Anneal_temp'] < 0) or (row['Anneal_temp'] > 150):
-                check += 1
-                print "Error: Annealing temperature not within acceptable range"
-                print row['Anneal_temp']
+            if (isinstance(row['Anneal_temp'], float)) or (isinstance(row['Anneal_temp'], int)):
+                if (row['Anneal_temp'] < 0) or (row['Anneal_temp'] > 150):
+                    check += 1
+                    print "Error: Annealing temperature not within acceptable range"
+                    print row['Anneal_temp']
 
         if check == 0:
-            print "All annealing temperatures valid"
+            print "Annealing temperatures valid"
