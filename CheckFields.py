@@ -84,3 +84,5 @@ class CheckFields(object):
 
         if check == 0:
             print "All annealing temperatures valid"
+        else:
+            print "Done"
