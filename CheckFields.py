@@ -62,10 +62,10 @@ class CheckFields(object):
     def check_version(self):
         check = 0
         for row_index, row in self.primer_df.iterrows():
-            if (not isinstance(row['Version'], float)) and (not isinstance(row['Version'], int)):
+            if (not isinstance(row['Version_no'], float)) and (not isinstance(row['Version_no'], int)):
                 check += 1
                 print "Error: Version not a number"
-                print row['Version']
+                print row['Version_no']
 
         if check == 0:
             print "All version numbers valid"

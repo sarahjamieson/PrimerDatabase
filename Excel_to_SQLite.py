@@ -17,9 +17,10 @@ for item in sheet_names:
 def get_primers():
     curs.execute('DROP TABLE IF EXISTS Primers')  # only include this for testing code
 
-    df_primers = pd.read_excel(excel_file, header=0, parse_cols='A:E,H:K',
-                               names=['Gene_name', 'Exon', 'Direction', 'Version', 'Primer_seq', 'Batch_no',
-                                      'Frag_size', 'Anneal_temp', 'Other info'], sheetname=sheet_name)
+    df_primers = pd.read_excel(excel_file, header=0, parse_cols='A:E,G:M',
+                               names=['Gene', 'Exon', 'Direction', 'Version_no', 'Primer_seq', 'M13_tag', 'Batch_no',
+                                      'Batch_test_MS_project', 'Order_date', 'Frag_size', 'Anneal_temp', 'Other info'],
+                               sheetname=sheet_name)
 
     df_primers.index.names = ['Primer_Id']  # Changes index title from "Index" to "Primer_Id" to act as primary key.
 
@@ -41,14 +42,14 @@ def get_primers():
 # Pulls gene and chromosome info from excel file and adds to SQLite table "Genes" in test database.
 def get_gene_info():
     curs.execute('DROP TABLE IF EXISTS Genes')  # only include this for testing code
-    df_chrom = pd.read_excel(excel_file, header=0, parse_cols='A,F', names=['Gene_name', 'Chrom'],
+    df_chrom = pd.read_excel(excel_file, header=0, parse_cols='A,F', names=['Gene', 'Chrom'],
                              index_col=False)
 
-    gene_name = df_chrom.at[0, 'Gene_name']
+    gene_name = df_chrom.at[0, 'Gene']
     chrom_no = int(df_chrom.at[0, 'Chrom'])
     gene_chrom = [gene_name, chrom_no]
 
-    curs.execute("CREATE TABLE Genes(Gene_name TEXT PRIMARY KEY, Chromosome_no INT)") # only use this the first time
+    curs.execute("CREATE TABLE Genes(Gene TEXT PRIMARY KEY, Chromosome_no INT)")  # only use this the first time
     curs.execute("INSERT INTO Genes VALUES (?,?)", gene_chrom)
     con.commit()
 
@@ -56,9 +57,9 @@ def get_gene_info():
 def get_snps():
     curs.execute('DROP TABLE IF EXISTS SNPs') # only include this for testing code
 
-    df_snps = pd.read_excel(excel_file, header=0, parse_cols='M:V',
+    df_snps = pd.read_excel(excel_file, header=0, parse_cols='O:X',
                             names=['SNPCheck_build', 'Total_SNPs', 'dbSNP_rs', 'HGVS', 'Frequency', 'ss_refs',
-                                   'ss_projects', 'Other_info', 'Action_taken', 'Checked_by'],
+                                   'ss_projects', 'Other_info', 'Action_required', 'Checked_by'],
                             index_col=False)
 
     df_snps.index.names = ['SNP_Id']  # Changes index title from "Index" to "SNP_Id" to act as primary key.
