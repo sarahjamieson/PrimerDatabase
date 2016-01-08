@@ -54,7 +54,7 @@ def get_gene_info():
     chrom_no = int(df_chrom.at[0, 'Chrom'])
     gene_chrom = [gene_name, chrom_no]
 
-    curs.execute("CREATE TABLE Genes(Gene TEXT PRIMARY KEY, Chromosome_no INT)")  # only use this the first time
+    # curs.execute("CREATE TABLE Genes(Gene TEXT PRIMARY KEY, Chromosome_no INT)")  # only use this the first time
     curs.execute("INSERT INTO Genes VALUES (?,?)", gene_chrom)
     con.commit()
 

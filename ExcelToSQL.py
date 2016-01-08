@@ -43,27 +43,25 @@ class ExcelToSQL(object):
         del df_primers['index']
         df_primers.index.names = ['Primer_Id']  # Changes index title from "Index" to "Primer_Id".
 
-        print df_primers
-
         check = CheckFields(df_primers)
         check.get_all()
 
-        df_primers.to_sql('Primers', con, if_exists='replace')
+        df_primers.to_sql('Primers', con, if_exists='append')
 
     def get_gene_info(self):
         curs, con = self.get_cursor()
         sheet_name = self.get_sheet_name()
 
-        curs.execute("DROP TABLE IF EXISTS 'Genes'")  # for testing only
+        # curs.execute("DROP TABLE IF EXISTS 'Genes'")  # for testing only
 
         df_chrom = pd.read_excel(self.excel_file, skiprows=2, parse_cols='A,F', names=['Gene', 'Chrom'],
                                  sheetname=sheet_name)
 
         gene_name = df_chrom.at[0, 'Gene']
-        chrom_no = int(df_chrom.at[0, 'Chrom'])
+        chrom_no = df_chrom.at[0, 'Chrom']
         gene_chrom = [gene_name, chrom_no]
 
-        curs.execute("CREATE TABLE Genes(Gene TEXT PRIMARY KEY, Chromosome_no INT)")  # only use this the first time
+        # curs.execute("CREATE TABLE Genes(Gene TEXT PRIMARY KEY, Chromosome_no INT)")  # only use this the first time
         curs.execute("INSERT INTO Genes VALUES (?,?)", gene_chrom)
         con.commit()
 
@@ -83,7 +81,7 @@ class ExcelToSQL(object):
             df_snps[col] = df_snps[col].fillna(
                 method='ffill')  # forward fills empty cells (deals with merged cells) but for specified columns only
 
-        df_snps.to_sql('SNPs', con, if_exists='replace')  # Creates SQL table from data
+        df_snps.to_sql('SNPs', con, if_exists='append')  # Creates SQL table from data
 
     def get_all(self):
         self.get_cursor()

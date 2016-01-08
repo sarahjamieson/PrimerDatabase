@@ -4,13 +4,15 @@ class CheckFields(object):
 
     def check_special(self):
         import re
+        import datetime
         check = 0
         for row_index, row in self.primer_df.iterrows():
             for colname in self.primer_df.columns:
                 row_element = row[colname]
-                if (row_element is not None) and (type(row_element) != float) and (type(row_element) != int):
+                if (row_element is not None) and (type(row_element) != float) and (type(row_element) != int) and (
+                            type(row_element) != datetime.datetime):
                     for letter in row_element:
-                        if re.match("[?!~@#^&+:;,%'{}]", letter):
+                        if re.match("[?!~@#^&+:;%'{}]", letter):
                             check += 1
                             print "Error: invalid entry"
                             print row_element
@@ -48,14 +50,15 @@ class CheckFields(object):
     def check_fragments(self):
         check = 0
         for row_index, row in self.primer_df.iterrows():
-            if (not isinstance(row['Frag_size'], float)) and (not isinstance(row['Frag_size'], int)):
-                check += 1
-                print "Error: Fragment size not a number"
-                print row['Frag_size']
-            if (row['Frag_size'] < 0) or (row['Frag_size'] > 1000):
-                check += 1
-                print "Error: Fragment size not within acceptable range"
-                print row['Frag_size']
+            if row['Frag_size'] is not None:
+                if (not isinstance(row['Frag_size'], float)) and (not isinstance(row['Frag_size'], int)):
+                    check += 1
+                    print "Error: Fragment size not a number"
+                    print row['Frag_size']
+                if (row['Frag_size'] < 0) or (row['Frag_size'] > 1000):
+                    check += 1
+                    print "Error: Fragment size not within acceptable range"
+                    print row['Frag_size']
 
         if check == 0:
             print "All fragment sizes valid"

@@ -1,6 +1,9 @@
+import warnings
 from ExcelToSQL import ExcelToSQL
 
-excel_file = 'CHARGE_CHD7.xlsx'
+warnings.simplefilter("ignore", UserWarning)
+
+excel_file = 'Alport_COL4A5.xlsx'
 db = 'Primer_v1.db'
 
 ets = ExcelToSQL(excel_file, db)
