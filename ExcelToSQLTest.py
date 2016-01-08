@@ -82,10 +82,11 @@ class ExcelToSQL(object):
         gene_chrom = self.get_gene_info()
         df_snps = self.get_snps()
 
-        df_primers.to_sql('Primers', con, if_exists='append')  # "replace" for testing
+        df_primers.to_sql('Primers', con, if_exists='replace')
 
+        curs.execute("DROP TABLE IF EXISTS 'Genes'")  # for testing only
+        curs.execute("CREATE TABLE Genes(Gene TEXT PRIMARY KEY, Chromosome_no INT)")  # only use this the first time
         curs.execute("INSERT INTO Genes VALUES (?,?)", gene_chrom)
         con.commit()
 
-        df_snps.to_sql('SNPs', con, if_exists='append')  # "replace" for testing
-
+        df_snps.to_sql('SNPs', con, if_exists='replace')
