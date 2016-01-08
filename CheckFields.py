@@ -83,3 +83,11 @@ class CheckFields(object):
 
         if check == 0:
             print "Annealing temperatures valid"
+
+    def get_all(self):
+        self.check_special()
+        self.check_nucs()
+        self.check_direction()
+        self.check_fragments()
+        self.check_version()
+        self.check_anneal()
