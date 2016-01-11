@@ -1,0 +1,15 @@
+Select p.Gene,
+       g.Chromosome_no, 
+       p.Exon, 
+       p.Direction, 
+       p.Version_no, 
+       p.Primer_seq, 
+       p.M13_tag, 
+       p.Batch_no, 
+       p.Batch_test_MS_project, 
+       p.Order_date, 
+       p.Frag_size, 
+       p.Anneal_temp, 
+       p."Other info" from Primers p
+Left join Genes g
+On p.Gene = g.Gene
