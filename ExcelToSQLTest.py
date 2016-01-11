@@ -1,6 +1,6 @@
 import pandas as pd
 import re
-from CheckFields import CheckFields
+from CheckPrimers import CheckPrimers
 import sqlite3 as lite
 
 
@@ -30,20 +30,23 @@ class ExcelToSQL(object):
 
         df_primers = pd.read_excel(self.excel_file, header=0, parse_cols='A:E,G:M', skiprows=2,
                                    names=['Gene', 'Exon', 'Direction', 'Version_no', 'Primer_seq', 'M13_tag',
-                                          'Batch_no',
-                                          'Batch_test_MS_project', 'Order_date', 'Frag_size', 'Anneal_temp',
-                                          'Other info'],
+                                          'Batch_no', 'Batch_test_MS_project', 'Order_date', 'Frag_size', 'Anneal_temp',
+                                          'Other_info'],
                                    sheetname=sheet_name, index_col=None)
 
-        df_primers = df_primers.fillna(method='ffill')  # forward fills empty cells (deals with merged cells)
+        for col in ['Gene', 'Exon', 'Direction', 'Primer_seq']:
+            df_primers[col] = df_primers[col].fillna(method='ffill')
+
+        for col in ['Frag_size', 'Anneal_temp', 'Other_info']:
+            df_primers[col] = df_primers[col].fillna(method='ffill', limit=1)
+
         df_primers = df_primers.where((pd.notnull(df_primers)), None)
         df_primers = df_primers.drop_duplicates()
         df_primers = df_primers.reset_index()
         del df_primers['index']
-        df_primers.index.names = ['Primer_Id']  # Changes index title from "Index" to "Primer_Id".
 
-        check = CheckFields(df_primers)
-        check.get_all()
+        check = CheckPrimers(df_primers)
+        check.check_all()
 
         return df_primers
 
