@@ -28,6 +28,12 @@ class ExcelToSQL(object):
     def get_primers(self):
         sheet_name = self.get_sheet_name()
 
+        xl = pd.ExcelFile(self.excel_file)
+        sheet_names = xl.sheet_names
+        for item in sheet_names:
+            if re.match("(.*)Current primers", item, re.IGNORECASE):
+                sheet_name = item
+
         df_primers = pd.read_excel(self.excel_file, header=0, parse_cols='A:E,G:M', skiprows=2,
                                    names=['Gene', 'Exon', 'Direction', 'Version_no', 'Primer_seq', 'M13_tag',
                                           'Batch_no',
@@ -40,7 +46,6 @@ class ExcelToSQL(object):
         df_primers = df_primers.drop_duplicates()
         df_primers = df_primers.reset_index()
         del df_primers['index']
-        df_primers.index.names = ['Primer_Id']  # Changes index title from "Index" to "Primer_Id".
 
         check = CheckFields(df_primers)
         check.get_all()
