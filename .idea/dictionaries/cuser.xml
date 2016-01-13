@@ -2,6 +2,7 @@
   <dictionary name="cuser">
     <words>
       <w>sheetname</w>
+      <w>vers</w>
     </words>
   </dictionary>
 </component>
