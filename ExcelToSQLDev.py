@@ -76,8 +76,8 @@ class ExcelToSQL(object):
 
         df_snps = df_snps.where((pd.notnull(df_snps)), None)
         df_snps = df_snps.drop_duplicates()
-        df_primers = df_snps.reset_index()
-        del df_primers['index']
+        df_snps = df_snps.reset_index()
+        del df_snps['index']
 
         snps_er, rs_er, hgvs_er = CheckSNPs(df_snps).check_all()
         snp_faults = snps_er + rs_er + hgvs_er
