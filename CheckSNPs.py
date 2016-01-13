@@ -1,10 +1,17 @@
 class CheckSNPs(object):
-    def __init__(self, primer_df):
-        self.primer_df = primer_df
+    """Checks extracted SNP data for valid data entries.
+
+       Args:
+           :param snp_df: data frame to be checked.
+    """
+
+
+    def __init__(self, snp_df):
+        self.snp_df = snp_df
 
     def check_no_snps(self):
         check = 0
-        for row_index, row in self.primer_df.iterrows():
+        for row_index, row in self.snp_df.iterrows():
             if row['Total_SNPs'] is not None:
                 if (not isinstance(row['Total_SNPs'], float)) and (not isinstance(row['Total_SNPs'], int)):
                     check += 1
@@ -14,7 +21,7 @@ class CheckSNPs(object):
     def check_rs(self):
         import re
         check = 0
-        for row_index, row in self.primer_df.iterrows():
+        for row_index, row in self.snp_df.iterrows():
             if row['dbSNP_rs'] is not None:
                 if not re.match("rs(.*)", row['dbSNP_rs']):
                     check += 1
@@ -24,7 +31,7 @@ class CheckSNPs(object):
     def check_hgvs(self):
         import re
         check = 0
-        for row_index, row in self.primer_df.iterrows():
+        for row_index, row in self.snp_df.iterrows():
             if row['HGVS'] is not None:
                 if not re.match("c(.*)", row['HGVS']):
                     check += 1
