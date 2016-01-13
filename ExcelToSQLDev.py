@@ -1,6 +1,7 @@
 import pandas as pd
 import re
 from CheckPrimers import CheckPrimers
+from CheckSNPs import CheckSNPs
 import sqlite3 as lite
 
 
@@ -37,18 +38,16 @@ class ExcelToSQL(object):
         for col in ['Gene', 'Exon', 'Direction', 'Primer_seq']:
             df_primers[col] = df_primers[col].fillna(method='ffill')
 
-        for col in ['Frag_size', 'Anneal_temp', 'Other_info']:
-            df_primers[col] = df_primers[col].fillna(method='ffill', limit=1)
-
         df_primers = df_primers.where((pd.notnull(df_primers)), None)
         df_primers = df_primers.drop_duplicates()
         df_primers = df_primers.reset_index()
         del df_primers['index']
 
-        check = CheckPrimers(df_primers)
-        check.check_all()
+        gene_er, exon_er, dir_er, vers_er, seq_er, tag_er, bat_er, date_er, frag_er, ann_er = CheckPrimers(
+            df_primers).check_all()
+        primer_faults = gene_er + exon_er + dir_er + vers_er + seq_er + tag_er + bat_er + date_er + frag_er + ann_er
 
-        return df_primers
+        return df_primers, primer_faults
 
     def get_gene_info(self):
         sheet_name = self.get_sheet_name()
@@ -71,25 +70,36 @@ class ExcelToSQL(object):
                                        'Checked_by'],
                                 index_col=False, sheetname=sheet_name)
 
-        df_snps.index.names = ['SNP_Id']  # Changes index title from "Index" to "SNP_Id" to act as primary key.
-
         for col in ['Gene', 'Exon', 'Direction']:
             df_snps[col] = df_snps[col].fillna(
                 method='ffill')  # forward fills empty cells (deals with merged cells) but for specified columns only
 
-        return df_snps
+        df_snps = df_snps.where((pd.notnull(df_snps)), None)
+        df_snps = df_snps.drop_duplicates()
+        df_primers = df_snps.reset_index()
+        del df_primers['index']
+
+        snps_er, rs_er, hgvs_er = CheckSNPs(df_snps).check_all()
+        snp_faults = snps_er + rs_er + hgvs_er
+
+        return df_snps, snp_faults
 
     def to_sql(self):
         curs, con = self.get_cursor()
-        df_primers = self.get_primers()
+        df_primers, primer_faults = self.get_primers()
         gene_chrom = self.get_gene_info()
-        df_snps = self.get_snps()
+        df_snps, snp_faults = self.get_snps()
 
-        df_primers.to_sql('Primers', con, if_exists='replace')
+        if primer_faults == 0 and snp_faults == 0:
+            print "All checks complete with no errors"
+            df_primers.to_sql('Primers', con, if_exists='replace')
 
-        curs.execute("DROP TABLE IF EXISTS 'Genes'")  # for testing only
-        curs.execute("CREATE TABLE Genes(Gene TEXT PRIMARY KEY, Chromosome_no INT)")  # only use this the first time
-        curs.execute("INSERT INTO Genes VALUES (?,?)", gene_chrom)
-        con.commit()
+            curs.execute("DROP TABLE IF EXISTS 'Genes'")  # for testing only
+            curs.execute("CREATE TABLE Genes(Gene TEXT, Chromosome_no INT)")  # only use this the first time
+            curs.execute("INSERT INTO Genes VALUES (?,?)", gene_chrom)
+            con.commit()
 
-        df_snps.to_sql('SNPs', con, if_exists='replace')
+            df_snps.to_sql('SNPs', con, if_exists='replace')
+
+        else:
+            print "Errors must be fixed before adding to database"
