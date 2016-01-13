@@ -1,6 +1,7 @@
 import pandas as pd
 import re
-from CheckFields import CheckFields
+from CheckPrimers import CheckPrimers
+from CheckSNPs import CheckSNPs
 import sqlite3 as lite
 
 
@@ -28,29 +29,23 @@ class ExcelToSQL(object):
     def get_primers(self):
         sheet_name = self.get_sheet_name()
 
-        xl = pd.ExcelFile(self.excel_file)
-        sheet_names = xl.sheet_names
-        for item in sheet_names:
-            if re.match("(.*)Current primers", item, re.IGNORECASE):
-                sheet_name = item
-
         df_primers = pd.read_excel(self.excel_file, header=0, parse_cols='A:E,G:M', skiprows=2,
                                    names=['Gene', 'Exon', 'Direction', 'Version_no', 'Primer_seq', 'M13_tag',
-                                          'Batch_no',
-                                          'Batch_test_MS_project', 'Order_date', 'Frag_size', 'Anneal_temp',
-                                          'Other info'],
+                                          'Batch_no', 'Batch_test_MS_project', 'Order_date', 'Frag_size', 'Anneal_temp',
+                                          'Other_info'],
                                    sheetname=sheet_name, index_col=None)
 
-        df_primers = df_primers.fillna(method='ffill')  # forward fills empty cells (deals with merged cells)
+        for col in ['Gene', 'Exon', 'Direction', 'Primer_seq']:
+            df_primers[col] = df_primers[col].fillna(method='ffill')
+
         df_primers = df_primers.where((pd.notnull(df_primers)), None)
-        df_primers = df_primers.drop_duplicates()
-        df_primers = df_primers.reset_index()
-        del df_primers['index']
+        df_primers = df_primers.drop_duplicates(subset=['Gene', 'Exon', 'Direction'])
 
-        check = CheckFields(df_primers)
-        check.get_all()
+        gene_er, exon_er, dir_er, vers_er, seq_er, tag_er, bat_er, date_er, frag_er, ann_er = CheckPrimers(
+            df_primers).check_all()
+        primer_faults = gene_er + exon_er + dir_er + vers_er + seq_er + tag_er + bat_er + date_er + frag_er + ann_er
 
-        return df_primers
+        return df_primers, primer_faults
 
     def get_gene_info(self):
         sheet_name = self.get_sheet_name()
@@ -73,24 +68,38 @@ class ExcelToSQL(object):
                                        'Checked_by'],
                                 index_col=False, sheetname=sheet_name)
 
-        df_snps.index.names = ['SNP_Id']  # Changes index title from "Index" to "SNP_Id" to act as primary key.
-
         for col in ['Gene', 'Exon', 'Direction']:
             df_snps[col] = df_snps[col].fillna(
                 method='ffill')  # forward fills empty cells (deals with merged cells) but for specified columns only
 
-        return df_snps
+        df_snps = df_snps.where((pd.notnull(df_snps)), None)
+
+        snps_er, rs_er, hgvs_er = CheckSNPs(df_snps).check_all()
+        snp_faults = snps_er + rs_er + hgvs_er
+
+        return df_snps, snp_faults
 
     def to_sql(self):
         curs, con = self.get_cursor()
-        df_primers = self.get_primers()
+        df_primers, primer_faults = self.get_primers()
         gene_chrom = self.get_gene_info()
-        df_snps = self.get_snps()
+        df_snps, snp_faults = self.get_snps()
 
-        df_primers.to_sql('Primers', con, if_exists='append')  # "replace" for testing
+        if primer_faults == 0 and snp_faults == 0:
+            print "All checks complete with no errors"
 
-        curs.execute("INSERT INTO Genes VALUES (?,?)", gene_chrom)
-        con.commit()
+            # curs.execute("DROP TABLE IF EXISTS 'Primers'")  # only use the first time
+            df_primers.to_sql('Primers', con, if_exists='append', index=False)
 
-        df_snps.to_sql('SNPs', con, if_exists='append')  # "replace" for testing
+            # curs.execute("DROP TABLE IF EXISTS 'Genes'")  # only use the first time
+            # curs.execute("CREATE TABLE Genes(Gene TEXT, Chromosome INT)")  # only use the first time
+            curs.execute("INSERT INTO Genes VALUES (?,?)", gene_chrom)
+            con.commit()
+
+            # curs.execute("DROP TABLE IF EXISTS 'SNPs'")  # only use the first time
+            df_snps.to_sql('SNPs', con, if_exists='append', index=False)
+
+        else:
+            print "Errors must be fixed before adding to database"
+
 

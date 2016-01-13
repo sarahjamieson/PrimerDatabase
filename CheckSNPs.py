@@ -5,7 +5,6 @@ class CheckSNPs(object):
     def check_no_snps(self):
         check = 0
         for row_index, row in self.primer_df.iterrows():
-            print row['Total_SNPs'], row_index+4
             if row['Total_SNPs'] is not None:
                 if (not isinstance(row['Total_SNPs'], float)) and (not isinstance(row['Total_SNPs'], int)):
                     check += 1

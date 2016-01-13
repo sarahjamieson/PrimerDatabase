@@ -5,7 +5,7 @@ class CheckPrimers(object):
     def check_gene(self):
         global specials
         check = 0
-        specials = ['?', '!', '~', '@', '#', '^', '&', '+', ':', '.', ';', '%', '{', '}', '[', ']', ',']
+        specials = ['?', '!', '~', '@', '#', '^', '&', '+', ':', ';', '%', '{', '}', '[', ']', ',']
         for row_index, row in self.primer_df.iterrows():
             for char in row['Gene']:
                 if char in specials:
