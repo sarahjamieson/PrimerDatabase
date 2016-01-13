@@ -35,7 +35,7 @@ class TestCheckPrimers(unittest.TestCase):
 
     def test_check_batch(self):
         checks = self.cp.check_batch()
-        self.assertEqual(checks, 4)
+        self.assertEqual(checks, 3)
 
     def test_check_dates(self):
         checks = self.cp.check_dates()

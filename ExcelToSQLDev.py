@@ -41,9 +41,7 @@ class ExcelToSQL(object):
         df_primers = df_primers.where((pd.notnull(df_primers)), None)
         df_primers = df_primers.drop_duplicates(subset=['Gene', 'Exon', 'Direction'])
 
-        gene_er, exon_er, dir_er, vers_er, seq_er, tag_er, bat_er, date_er, frag_er, ann_er = CheckPrimers(
-            df_primers).check_all()
-        primer_faults = gene_er + exon_er + dir_er + vers_er + seq_er + tag_er + bat_er + date_er + frag_er + ann_er
+        primer_faults = sum(CheckPrimers(df_primers).check_all())
 
         return df_primers, primer_faults
 

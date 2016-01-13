@@ -18,14 +18,14 @@ class TestExcelToSQL(unittest.TestCase):
     def test_get_primers(self):
         self.assertIsInstance(self.primer_faults, int, msg="No of primer_faults is not an integer")
         self.assertIsInstance(self.df_primers, pd.DataFrame, msg="df_primers is not a data frame")
-        self.assertEqual(len(self.df_primers), 89, msg="Incorrect number of rows")
+        self.assertEqual(len(self.df_primers), 84, msg="Incorrect number of rows")
         self.assertEqual(len(self.df_primers.columns), 12, msg="Incorrect number of columns")
         self.assertEqual(str(self.df_primers.iat[8, 4]), 'GTGCAATGAAGACAATGCTCC', "Entry does not match predicted")
 
     def test_get_snps(self):
         self.assertIsInstance(self.snp_faults, int, msg="No of snp_faults is not an integer")
         self.assertIsInstance(self.df_snps, pd.DataFrame, msg="df_snps is not a data frame")
-        self.assertEqual(len(self.df_snps), 91, msg="Incorrect number of rows")
+        self.assertEqual(len(self.df_snps), 92, msg="Incorrect number of rows")
         self.assertEqual(len(self.df_snps.columns), 13, msg="Incorrect number of columns")
         self.assertEqual(str(self.df_snps.iat[2, 6]), 'c.82-82T>C')
 
