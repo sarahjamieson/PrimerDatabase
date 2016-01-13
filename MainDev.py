@@ -3,7 +3,7 @@ from ExcelToSQLDev import ExcelToSQL
 
 warnings.simplefilter("ignore", UserWarning)
 
-excel_file = 'TestCS_COL4A5.xlsx'
+excel_file = 'Marfan_FBN1.xlsx'
 db = 'Test.db'
 
 ets = ExcelToSQL(excel_file, db)

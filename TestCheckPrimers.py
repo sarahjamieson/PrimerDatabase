@@ -47,7 +47,7 @@ class TestCheckPrimers(unittest.TestCase):
 
     def test_check_anneal_temp(self):
         checks = self.cp.check_anneal_temp()
-        self.assertEqual(checks, 2)
+        self.assertEqual(checks, 1)
 
     def test_check_all(self):
         self.assertEqual(len(self.cp.check_all()), 10)

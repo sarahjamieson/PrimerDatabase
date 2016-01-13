@@ -39,9 +39,7 @@ class ExcelToSQL(object):
             df_primers[col] = df_primers[col].fillna(method='ffill')
 
         df_primers = df_primers.where((pd.notnull(df_primers)), None)
-        df_primers = df_primers.drop_duplicates()
-        df_primers = df_primers.reset_index()
-        del df_primers['index']
+        df_primers = df_primers.drop_duplicates(subset=['Gene', 'Exon', 'Direction'])
 
         gene_er, exon_er, dir_er, vers_er, seq_er, tag_er, bat_er, date_er, frag_er, ann_er = CheckPrimers(
             df_primers).check_all()
@@ -75,9 +73,6 @@ class ExcelToSQL(object):
                 method='ffill')  # forward fills empty cells (deals with merged cells) but for specified columns only
 
         df_snps = df_snps.where((pd.notnull(df_snps)), None)
-        df_snps = df_snps.drop_duplicates()
-        df_snps = df_snps.reset_index()
-        del df_snps['index']
 
         snps_er, rs_er, hgvs_er = CheckSNPs(df_snps).check_all()
         snp_faults = snps_er + rs_er + hgvs_er
@@ -92,14 +87,14 @@ class ExcelToSQL(object):
 
         if primer_faults == 0 and snp_faults == 0:
             print "All checks complete with no errors"
-            df_primers.to_sql('Primers', con, if_exists='replace')
+            df_primers.to_sql('Primers', con, if_exists='replace', index=False)
 
-            curs.execute("DROP TABLE IF EXISTS 'Genes'")  # for testing only
-            curs.execute("CREATE TABLE Genes(Gene TEXT, Chromosome_no INT)")  # only use this the first time
+            curs.execute("DROP TABLE IF EXISTS 'Genes'")
+            curs.execute("CREATE TABLE Genes(Gene TEXT, Chromosome_no INT)")
             curs.execute("INSERT INTO Genes VALUES (?,?)", gene_chrom)
             con.commit()
 
-            df_snps.to_sql('SNPs', con, if_exists='replace')
+            df_snps.to_sql('SNPs', con, if_exists='replace', index=False)
 
         else:
             print "Errors must be fixed before adding to database"

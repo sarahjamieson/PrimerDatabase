@@ -98,10 +98,6 @@ class CheckPrimers(object):
                     if (row['Anneal_temp'] < 0) or (row['Anneal_temp'] > 150):
                         check += 1
                         print "Error: Annealing temperature not within acceptable range, see row", row_index+4
-                else:
-                    check += 1
-                    print "Error: Annealing temperature not a number, see row", row_index+4
-
         return check
 
     def check_all(self):
