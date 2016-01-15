@@ -138,12 +138,12 @@ class ExcelToSQL(object):
 
             df_primers.to_sql('Draft_Primers', con, if_exists='replace', index=False)
 
-            curs.execute("DROP TABLE IF EXISTS 'Primers'")  # Use first time only
-            curs.execute(
+            # curs.execute("DROP TABLE IF EXISTS 'Primers'")  # Use first time only
+            '''curs.execute(
                 "CREATE TABLE Primers(Primer_Id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, Gene TEXT, Exon TEXT, "
                 "Direction TEXT, Version REAL, Primer_Seq TEXT, M13_Tag TEXT, Batch_No TEXT, "
                 "Batch_Test_MS_Project TEXT, Order_Date TIMESTAMP, Fragment_Size REAL, Annealing_Temp TEXT, "
-                "Other_Info TEXT)")  # Use first time only
+                "Other_Info TEXT)")'''  # Use first time only
 
             curs.execute("INSERT INTO Primers (Gene, Exon, Direction, Version, Primer_Seq, M13_Tag, Batch_No, "
                          "Batch_Test_MS_Project, Order_Date, Fragment_Size, Annealing_Temp, Other_Info) SELECT * FROM "
@@ -154,19 +154,19 @@ class ExcelToSQL(object):
             curs.execute("CREATE TABLE Draft_Genes(Gene TEXT, Chromosome INT)")
             curs.execute("INSERT INTO Draft_Genes VALUES (?,?)", gene_chrom)
 
-            curs.execute("DROP TABLE IF EXISTS Genes")  # Use first time only
-            curs.execute("CREATE TABLE Genes(Gene_Id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, Gene TEXT, "
-                         "Chromosome INT)")  # Use first time only
+            # curs.execute("DROP TABLE IF EXISTS Genes")  # Use first time only
+            '''curs.execute("CREATE TABLE Genes(Gene_Id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, Gene TEXT, "
+                         "Chromosome INT)")'''  # Use first time only
             curs.execute("INSERT INTO Genes (Gene, Chromosome) SELECT * FROM Draft_Genes")
             curs.execute("DROP TABLE Draft_Genes")
 
             df_snps.to_sql('Draft_SNPs', con, if_exists='replace', index=False)
 
-            curs.execute("DROP TABLE IF EXISTS 'SNPs'")  # Use first time only
-            curs.execute("CREATE TABLE SNPs(SNP_Id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, Gene TEXT, Exon TEXT, "
+            # curs.execute("DROP TABLE IF EXISTS 'SNPs'")  # Use first time only
+            '''curs.execute("CREATE TABLE SNPs(SNP_Id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, Gene TEXT, Exon TEXT, "
                          "Direction TEXT, SNPCheck_Build REAL, Total_SNPs INT, dbSNP_rs TEXT, HGVS TEXT, "
                          "Frequency TEXT, ss_refs TEXT, ss_Projects TEXT, Other_Info TEXT, Action_Required TEXT, "
-                         "Checked_By TEXT)")  # Use first time only
+                         "Checked_By TEXT)")'''  # Use first time only
             curs.execute("INSERT INTO SNPs (Gene, Exon, Direction, SNPCheck_Build, Total_SNPs, dbSNP_rs, HGVS, "
                          "Frequency, ss_refs, ss_Projects, Other_Info, Action_Required, Checked_By) SELECT * FROM "
                          "Draft_SNPs")
