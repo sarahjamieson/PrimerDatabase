@@ -1,8 +1,17 @@
 class CheckPrimers(object):
+    """Checks extracted Primer data for valid data entries
+
+        Note:
+           Checks are only performed on columns with consistent data entries.
+        Args:
+            :param primer_df: data frame to be checked.
+    """
+
     def __init__(self, primer_df):
         self.primer_df = primer_df
 
     def check_gene(self):
+        """Returns the number of errors in the 'Gene' column (checks for special characters)."""
         global specials
         check = 0
         specials = ['?', '!', '~', '@', '#', '^', '&', '+', ':', ';', '%', '{', '}', '[', ']', ',']
@@ -14,6 +23,7 @@ class CheckPrimers(object):
         return check
 
     def check_exon(self):
+        """Returns the number of errors in the 'Exon' column (checks for special characters)."""
         check = 0
         for row_index, row in self.primer_df.iterrows():
             for char in str(row['Exon']):
@@ -23,6 +33,7 @@ class CheckPrimers(object):
         return check
 
     def check_direction(self):
+        """Returns the number of errors in the 'Direction' column (should only contain "F" or "R")."""
         check = 0
         direction_list = ['F', 'R']
         for row_index, row in self.primer_df.iterrows():
@@ -32,6 +43,7 @@ class CheckPrimers(object):
         return check
 
     def check_version(self):
+        """Returns the number of errors in the 'Version' column (should be a numerical value)."""
         check = 0
         for row_index, row in self.primer_df.iterrows():
             if (row['Version_no'] is not None) and (not isinstance(row['Version_no'], float)) and (
@@ -41,6 +53,7 @@ class CheckPrimers(object):
         return check
 
     def check_seq(self):
+        """Returns the number of errors in the 'Primer-Seq' column (should only contain "A", "T", "C" or "G")."""
         nuc_list = ['A', 'T', 'C', 'G']
         check = 0
         for row_index, row in self.primer_df.iterrows():
@@ -51,6 +64,7 @@ class CheckPrimers(object):
         return check
 
     def check_tag(self):
+        """Returns the number of errors in the 'M13_tag' column (should only contain "Y" or "N")."""
         check = 0
         tag_list = ['Y', 'N']
         for row_index, row in self.primer_df.iterrows():
@@ -60,6 +74,7 @@ class CheckPrimers(object):
         return check
 
     def check_batch(self):
+        """Returns the number of errors in the 'Batch_no' column (checks for special characters)."""
         check = 0
         for row_index, row in self.primer_df.iterrows():
             if row['Batch_no'] is not None:
@@ -70,6 +85,7 @@ class CheckPrimers(object):
         return check
 
     def check_dates(self):
+        """Returns the number of errors in the 'Order_date' column (should be a datetime object)."""
         import datetime
         check = 0
         for row_index, row in self.primer_df.iterrows():
@@ -79,6 +95,7 @@ class CheckPrimers(object):
         return check
 
     def check_frag_size(self):
+        """Returns the number of errors in the 'Frag_size' column (should be numerical and a valid length)."""
         check = 0
         for row_index, row in self.primer_df.iterrows():
             if row['Frag_size'] is not None:
@@ -91,6 +108,7 @@ class CheckPrimers(object):
         return check
 
     def check_anneal_temp(self):
+        """Returns the number of errors in the 'Anneal_temp' column (should be numerical and a valid temperature)."""
         check = 0
         for row_index, row in self.primer_df.iterrows():
             if row['Anneal_temp'] is not None:
@@ -101,6 +119,7 @@ class CheckPrimers(object):
         return check
 
     def check_all(self):
+        """Returns all checks as a list"""
         return self.check_gene(), self.check_exon(), self.check_direction(), self.check_version(), self.check_seq(), \
                self.check_tag(), self.check_batch(), self.check_dates(), self.check_frag_size(), \
                self.check_anneal_temp()
