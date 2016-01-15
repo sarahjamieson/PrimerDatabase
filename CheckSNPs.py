@@ -44,4 +44,5 @@ class CheckSNPs(object):
         return check
 
     def check_all(self):
+        """Returns all checks as a list"""
         return self.check_no_snps(), self.check_rs(), self.check_hgvs()
