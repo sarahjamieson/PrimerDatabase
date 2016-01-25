@@ -1,6 +1,6 @@
 import unittest
-from excel_to_sql_dev import ExcelToSQL
-from check_snps import CheckSNPs
+from exceltosqldev import ExcelToSQL
+from checksnps import CheckSNPs
 
 
 class TestCheckSNPs(unittest.TestCase):

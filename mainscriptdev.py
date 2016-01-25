@@ -1,5 +1,5 @@
 import warnings
-from excel_to_sql_dev import ExcelToSQL
+from exceltosqldev import ExcelToSQL
 
 warnings.simplefilter("ignore", UserWarning)
 

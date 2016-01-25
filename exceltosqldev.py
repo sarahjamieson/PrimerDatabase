@@ -1,7 +1,7 @@
 import pandas as pd
 import re
-from check_primers import CheckPrimers
-from check_snps import CheckSNPs
+from checkprimers import CheckPrimers
+from checksnps import CheckSNPs
 import sqlite3 as lite
 
 
