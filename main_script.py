@@ -1,5 +1,5 @@
 import warnings
-from ExcelToSQL import ExcelToSQL
+from excel_to_sql import ExcelToSQL
 warnings.simplefilter("ignore", UserWarning)
 
 """Module takes an excel file and database as inputs and runs the ExcelToSQL class to add excel files to a database."""

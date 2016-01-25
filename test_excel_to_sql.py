@@ -1,5 +1,5 @@
 import unittest
-from ExcelToSQLDev import ExcelToSQL
+from excel_to_sql_dev import ExcelToSQL
 import pandas as pd
 
 

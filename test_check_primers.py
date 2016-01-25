@@ -1,6 +1,6 @@
 import unittest
-from ExcelToSQLDev import ExcelToSQL
-from CheckPrimers import CheckPrimers
+from excel_to_sql_dev import ExcelToSQL
+from check_primers import CheckPrimers
 
 
 class TestCheckPrimers(unittest.TestCase):
