@@ -123,3 +123,14 @@ class CheckPrimers(object):
         return self.check_gene(), self.check_exon(), self.check_direction(), self.check_version(), self.check_seq(), \
                self.check_tag(), self.check_batch(), self.check_dates(), self.check_frag_size(), \
                self.check_anneal_temp()
+
+    def check_chrom(self):
+        """Returns the number of errors in the 'Chrom' column (should be 1-23, X or Y)."""
+        check = 0
+        chromosomes = [range(1, 23), 'X', 'Y']
+        for row_index, row in self.primer_df.iterrows():
+            if row['Chrom'] is not None:
+                if row['Chrom'] not in chromosomes:
+                    check +=1
+                    print "Error: invalid chromosome, see row", row_index+4, row['Chrom']
+        return check

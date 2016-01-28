@@ -86,11 +86,15 @@ class ExcelToSQL(object):
         df_chrom = pd.read_excel(self.excel_file, skiprows=2, parse_cols='A,F', names=['Gene', 'Chrom'],
                                  sheetname=sheet_name)
 
+        df_chrom = df_chrom.where((pd.notnull(df_chrom)), None)  # Easier to check than NaN.
+
+        chrom_faults = (CheckPrimers(df_chrom).check_chrom())
+
         gene_name = df_chrom.at[0, 'Gene']
         chrom_no = df_chrom.at[0, 'Chrom']
         gene_chrom = gene_name, chrom_no
 
-        return gene_chrom
+        return gene_chrom, chrom_faults
 
     def get_snps(self):
         """Extracts and check SNP data from the sheet.
@@ -130,10 +134,10 @@ class ExcelToSQL(object):
 
         curs, con = self.get_cursor()
         df_primers, primer_faults = self.get_primers()
-        gene_chrom = self.get_gene_info()
+        gene_chrom, chrom_faults = self.get_gene_info()
         df_snps, snp_faults = self.get_snps()
 
-        if primer_faults == 0 and snp_faults == 0:
+        if primer_faults == 0 and snp_faults == 0 and chrom_faults == 0:
             print "All checks complete with no errors"
 
             df_primers.to_sql('Draft_Primers', con, if_exists='replace', index=False)
