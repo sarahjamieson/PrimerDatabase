@@ -52,6 +52,8 @@ class GetCoordinates(object):
 
         primer_seqs.to_csv('primerseqs.csv', header=None, index=None, sep='\t')
 
+        return names, primer_list
+
     def run_pcr(self):
         chromosomes = ['chr10.2bit', 'chr11.2bit', 'chr12.2bit', 'chr1.2bit', 'chr13.2bit', 'chr14.2bit', 'chr15.2bit',
                        'chr16.2bit', 'chr17.2bit', 'chr18.2bit', 'chr19.2bit', 'chr20.2bit', 'chr21.2bit', 'chr22.2bit',
@@ -63,12 +65,14 @@ class GetCoordinates(object):
                 "/opt/kentools/isPcr -out=psl /media/genomicdata/ucsc_hg19_by_chr/2bit_chr/%s \
                 primerseqs.csv %s.tmp.psl" % (chr, chr[:-5]))
 
-            chrfile = "%s.tmp.psl" % chr[:-5]
+            pslfile = "%s.tmp.psl" % chr[:-5]
+            bedfile = "%s.tmp.bed" % chr[:-5]
 
-            if os.path.getsize(chrfile) != 0:
-                os.system("/opt/kentools/pslToBed %s.tmp.psl coords.tmp.bed" % chr[:-5])
+            if os.path.getsize(pslfile) != 0:
+                os.system("/opt/kentools/pslToBed %s %s" % (pslfile, bedfile))
             else:
-                os.system("rm %s.tmp.psl" % chr[:-5])
+                os.system("rm %s" % pslfile)
+        return bedfile
 
     def get_all(self):
         self.get_sheet_name()
