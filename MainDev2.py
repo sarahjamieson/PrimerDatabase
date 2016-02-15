@@ -1,11 +1,13 @@
+from getprimers import GetPrimers
 from getcoordinates import GetCoordinates
 
-excel_file = 'Alport_example.xlsx'
+excel_file = 'Alport_example.xlsx'  # user input for excel file
 
-gc = GetCoordinates(excel_file)
-gc.get_all()
+df_primers_dups, df_primers = GetPrimers(excel_file).get_primers()
+df_snps = GetPrimers(excel_file).get_snps()
 
-bedfile = gc.run_pcr()
-names, primer_list = gc.make_csv()
+filename = 'TestOutput'
 
-# MakeBedFile(bedfile, names, primer_list)
+# filename = raw_input('What name would you like to save the output as? ')
+
+GetCoordinates(df_primers, df_primers_dups, filename, df_snps).run_all()

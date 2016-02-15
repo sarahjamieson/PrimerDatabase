@@ -1,41 +1,27 @@
 import pandas as pd
-import re
 import os
+import pybedtools as bed
 
 
 class GetCoordinates(object):
-    def __init__(self, excel_file):
-        self.excel_file = excel_file
-
-    def get_sheet_name(self):
-        xl = pd.ExcelFile(self.excel_file)
-        sheet_names = xl.sheet_names
-        for item in sheet_names:
-            if re.match("(.*)Current primers", item, re.IGNORECASE):
-                sheet_name = item
-        return sheet_name
-
-    def get_primers(self):
-        sheet_name = self.get_sheet_name()
-        df_primers = pd.read_excel(self.excel_file, header=0, parse_cols='A:M', skiprows=2,
-                                   names=['Gene', 'Exon', 'Direction', 'Version_no', 'Primer_seq', 'Chrom', 'M13_tag',
-                                          'Batch_no', 'Batch_test_MS_project', 'Order_date', 'Frag_size', 'Anneal_temp',
-                                          'Other_info'],
-                                   sheetname=sheet_name, index_col=None)
-
-        df_primers = df_primers.where((pd.notnull(df_primers)), None)
-        df_primers = df_primers.drop_duplicates(subset=('Gene', 'Exon', 'Direction', 'Chrom'))
-        return df_primers
+    def __init__(self, df_primers, df_primers_dups, filename, df_snps):
+        self.df_primers = df_primers
+        self.filename = filename
+        self.df_primers_dups = df_primers_dups
+        self.df_snps = df_snps
 
     def make_csv(self):
-        df_primers = self.get_primers()
         primer_list = []
         names_dup = []
         names = []
+        exons = []
+        dirs = []
 
-        for row_index, row in df_primers.iterrows():
+        for row_index, row in self.df_primers.iterrows():
             primer_list.append(str(row['Primer_seq']))
             names_dup.append(str(row['Gene']) + "_" + str(row['Exon']) + "_" + str(row['Direction']))
+            exons.append(str(row['Exon']))
+            dirs.append(str(row['Direction']))
             for item in names_dup:
                 if item not in names:
                     names.append(item)
@@ -52,8 +38,9 @@ class GetCoordinates(object):
 
         primer_seqs.to_csv('primerseqs.csv', header=None, index=None, sep='\t')
 
-        return names, primer_list
+        return names, exons, dirs, primer_list
 
+    '''
     def run_pcr(self):
         chromosomes = ['chr10.2bit', 'chr11.2bit', 'chr12.2bit', 'chr1.2bit', 'chr13.2bit', 'chr14.2bit', 'chr15.2bit',
                        'chr16.2bit', 'chr17.2bit', 'chr18.2bit', 'chr19.2bit', 'chr20.2bit', 'chr21.2bit', 'chr22.2bit',
@@ -73,9 +60,70 @@ class GetCoordinates(object):
             else:
                 os.system("rm %s" % pslfile)
         return bedfile
+        '''
 
-    def get_all(self):
-        self.get_sheet_name()
-        self.get_primers()
+    def get_coords(self):
+        tool = bed.BedTool('coords.tmp.bed')
+        start_coords = []
+        end_coords = []
+        chroms = []
+        seq_position = 0
+        names, exons, dirs, primer_list = self.make_csv()
+
+        for row in tool:
+            chroms.append(row.chrom)
+            start_coords.append(row.start)
+            end_coords.append(row.start + len(primer_list[seq_position]))
+            chroms.append(row.chrom)
+            end_coords.append(row.end)
+            start_coords.append(row.end - len(primer_list[seq_position + 1]))
+            seq_position += 1
+
+        df_coords = pd.DataFrame([])
+        df_coords.insert(0, 'chrom', chroms)
+        df_coords.insert(1, 'start', start_coords)
+        df_coords.insert(2, 'end', end_coords)
+        df_coords.insert(3, 'name', names)
+
+        return df_coords
+
+    def make_bed(self):
+        df_coords = self.get_coords()
+
+        df_coords.to_csv('%s.csv' % self.filename, header=None, index=None, sep='\t')
+        csv_file = bed.BedTool('%s.csv' % self.filename)
+        csv_file.saveas('%s.bed' % self.filename)
+
+        os.system("rm /home/cuser/PycharmProjects/PrimerDatabase/%s.csv" % self.filename)
+
+    def col_to_string(self, row):
+        return str(row['Exon'])
+
+    def make_excel(self):
+        df_coords = self.get_coords()
+        names, exons, dirs, primer_list = self.make_csv()
+
+        df_coords.insert(4, 'Exon', exons)
+        df_coords.insert(5, 'Direction', dirs)
+
+        df_coords['Exon'] = df_coords.apply(self.col_to_string, axis=1)  # converts to string for merging
+        self.df_primers_dups['Exon'] = self.df_primers_dups.apply(self.col_to_string, axis=1)
+
+        joined_df = pd.merge(self.df_primers_dups, df_coords, how='left', on=['Exon', 'Direction'])
+        cols_to_drop = ['name', 'chrom']
+        joined_df = joined_df.drop(cols_to_drop, axis=1)
+
+        writer = pd.ExcelWriter('%s.xlsx' % self.filename)
+        joined_df.to_excel(writer, sheet_name='Current primers', index=False)
+        self.df_snps = self.df_snps.drop(['Exon', 'Direction'], axis=1)
+        self.df_snps.to_excel(writer, sheet_name='Current primers', index=False, startrow=0, startcol=16)
+        writer.save()
+
+        os.system("mv /home/cuser/PycharmProjects/PrimerDatabase/%s.xlsx /media/sf_sarah_share" % self.filename)
+
+    def run_all(self):
         self.make_csv()
-        self.run_pcr()
+        # self.run_pcr()
+        self.get_coords()
+        self.make_bed()
+        self.make_excel()
