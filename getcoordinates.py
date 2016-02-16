@@ -40,7 +40,6 @@ class GetCoordinates(object):
 
         return names, exons, dirs, primer_list
 
-    '''
     def run_pcr(self):
         chromosomes = ['chr10.2bit', 'chr11.2bit', 'chr12.2bit', 'chr1.2bit', 'chr13.2bit', 'chr14.2bit', 'chr15.2bit',
                        'chr16.2bit', 'chr17.2bit', 'chr18.2bit', 'chr19.2bit', 'chr20.2bit', 'chr21.2bit', 'chr22.2bit',
@@ -57,13 +56,12 @@ class GetCoordinates(object):
 
             if os.path.getsize(pslfile) != 0:
                 os.system("/opt/kentools/pslToBed %s %s" % (pslfile, bedfile))
+                return bedfile
             else:
                 os.system("rm %s" % pslfile)
-        return bedfile
-        '''
 
     def get_coords(self):
-        tool = bed.BedTool('coords.tmp.bed')
+        tool = bed.BedTool(self.run_pcr())
         start_coords = []
         end_coords = []
         chroms = []

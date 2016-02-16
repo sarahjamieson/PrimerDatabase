@@ -1,10 +1,10 @@
-from getprimers import GetPrimers
+from getexcel import GetExcel
 from getcoordinates import GetCoordinates
 
 excel_file = 'Alport_example.xlsx'  # user input for excel file
 
-df_primers_dups, df_primers = GetPrimers(excel_file).get_primers()
-df_snps = GetPrimers(excel_file).get_snps()
+df_primers_dups, df_primers = GetExcel(excel_file).get_primers()
+df_snps = GetExcel(excel_file).get_snps()
 
 filename = 'TestOutput'
 

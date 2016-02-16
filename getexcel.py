@@ -2,7 +2,7 @@ import pandas as pd
 import re
 
 
-class GetPrimers(object):
+class GetExcel(object):
     def __init__(self, excel_file):
         self.excel_file = excel_file
 
